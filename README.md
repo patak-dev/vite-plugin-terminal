@@ -31,7 +31,7 @@ export default {
 
 In your source code import `terminal`, and use it like you do with `console.log`.
 
-```
+```ts
 import { terminal } from 'virtual:terminal'
 
 terminal.log('Hey terminal! A message from the browser')
