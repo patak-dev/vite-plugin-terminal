@@ -29,11 +29,9 @@ export interface Options {
 
 function pluginTerminal(options: Options = {}) {
   const {
-    include = /.[js|ts|mjs|cjs|mts|cts|jsx|vue|svelte|marko]/,
+    include = /.[js|ts|mjs|cjs|mts|cts]/,
     exclude,
   } = options
-
-  const filter = createFilter(include, exclude)
 
   let config: ResolvedConfig
   let virtualModuleCode: string
@@ -44,8 +42,6 @@ function pluginTerminal(options: Options = {}) {
       config = _config
     },
     resolveId(id = ''): string | undefined {
-      if (!filter(id))
-        return
       if (id === virtualId)
         return virtualResolvedId
     },
