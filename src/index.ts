@@ -1,4 +1,4 @@
-import { lightMagenta, lightRed, lightYellow } from 'kolorist'
+import { lightGray, lightGreen, lightMagenta, lightRed, lightYellow } from 'kolorist'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { parseURL } from 'ufo'
 import rollupPluginStrip from '@rollup/plugin-strip'
@@ -24,6 +24,17 @@ export interface Options {
    * Filter for modules to not be processed to remove logs
    */
   exclude?: FilterPattern
+}
+
+const methods = ['info', 'log', 'warn', 'error', 'assert'] as const
+type Method = typeof methods[number]
+
+const colors = {
+  info: lightGray,
+  log: lightMagenta,
+  warn: lightYellow,
+  error: lightRed,
+  assert: lightGreen,
 }
 
 function pluginTerminal(options: Options = {}) {
@@ -53,15 +64,14 @@ function pluginTerminal(options: Options = {}) {
     configureServer(server: ViteDevServer) {
       server.middlewares.use('/__terminal', (req, res) => {
         const { pathname, search } = parseURL(req.url)
-        const message = decodeURI(search.slice(1))
-
-        if (pathname === '/log')
-          config.logger.info(lightMagenta(`  » ${message}`))
-        if (pathname === '/warn')
-          config.logger.info(lightYellow(`  » ${message}`))
-        else if (pathname === '/error')
-          config.logger.info(lightRed(`  » ${message}`))
-
+        const message = decodeURI(search.slice(1)).split('\n').join('\n  ')
+        if (pathname[0] === '/') {
+          const method = pathname.slice(1)
+          if (methods.includes(method)) {
+            const color = colors[method as Method]
+            config.logger.info(color(`» ${message}`))
+          }
+        }
         res.end()
       })
     },
@@ -70,7 +80,7 @@ function pluginTerminal(options: Options = {}) {
     ...rollupPluginStrip({
       include,
       exclude,
-      functions: ['log', 'warn', 'error'].map(name => `terminal.${name}`),
+      functions: methods.map(name => `terminal.${name}`),
     }),
     apply: 'build',
   }
@@ -83,13 +93,16 @@ export default terminal
 `
 }
 function createTerminal() {
-  function send(type: string, message: string) {
+  function send(type: string, obj: any) {
+    const message = typeof obj === 'object' ? `${JSON.stringify(obj, null, 2)}` : obj.toString()
     fetch(`/__terminal/${type}?${encodeURI(message)}`)
   }
   return {
-    log: (message: string) => send('log', message),
-    warn: (message: string) => send('warn', message),
-    error: (message: string) => send('error', message),
+    info: (obj: any) => send('info', obj),
+    log: (obj: any) => send('log', obj),
+    warn: (obj: any) => send('warn', obj),
+    error: (obj: any) => send('error', obj),
+    assert: (assertion: boolean, obj: any) => assertion && send('assert', obj),
   }
 }
 
