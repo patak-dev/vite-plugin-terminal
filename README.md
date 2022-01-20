@@ -4,6 +4,8 @@
 
 Log in the node terminal from the browser
 
+![](./vite-plugin-terminal.png)
+
 [Open a playground online in StackBlitz](https://stackblitz.com/edit/vitejs-vite-c8dfaq?file=main.js&terminal=dev)
 
 ## Install
