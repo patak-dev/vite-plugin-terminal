@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-terminal",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Log in the node terminal from the browser",
   "keywords": [
     "vite-plugin"
