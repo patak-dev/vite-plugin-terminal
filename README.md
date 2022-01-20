@@ -4,7 +4,7 @@
 
 Log in the node terminal from the browser
 
-![](./vite-plugin-terminal.png)
+![](https://github.com/patak-dev/vite-plugin-terminal/blob/76fb5c2656e99a8619986be2bff5c26414273a66/vite-plugin-terminal.png)
 
 [Open a playground online in StackBlitz](https://stackblitz.com/edit/vitejs-vite-c8dfaq?file=main.js&terminal=dev)
 
