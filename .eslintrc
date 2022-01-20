@@ -1,0 +1,7 @@
+{
+  "extends": ["@antfu"],
+  "rules": {
+    "no-undef": "off",
+    "import/named": "off"
+  }
+}

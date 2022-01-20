@@ -1,0 +1,77 @@
+{
+  "name": "vite-plugin-terminal",
+  "version": "0.1.0",
+  "description": "Log in the node terminal from the browser",
+  "keywords": [
+    "vite-plugin"
+  ],
+  "homepage": "https://github.com/patak-dev/vite-plugin-terminal#readme",
+  "bugs": {
+    "url": "https://github.com/patak-dev/vite-plugin-terminal/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patak-dev/vite-plugin-terminal.git"
+  },
+  "funding": "https://github.com/sponsors/patak-dev",
+  "license": "MIT",
+  "author": "Matias Capeletto <matias.capeletto@gmail.com>",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": "./*"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "*.d.ts"
+  ],
+  "scripts": {
+    "build": "rimraf dist && run-s build:*",
+    "build:js": "unbuild",
+    "dev": "vite playground/basic",
+    "dev:build": "vite build playground/basic",
+    "dev:preview": "vite preview playground/basic",
+    "dev:js": "nr build:js --watch src",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "lint:fix": "npm run lint -- --fix",
+    "prepublishOnly": "npm run build",
+    "release": "bumpp --commit --push --tag && npm publish"
+  },
+  "dependencies": {
+    "@rollup/plugin-strip": "^2.1.0",
+    "@rollup/pluginutils": "^4.1.2",
+    "debug": "^4.3.3",
+    "kolorist": "^1.5.1",
+    "sirv": "^2.0.0",
+    "ufo": "^0.7.9"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.14.2",
+    "@antfu/ni": "^0.12.0",
+    "@antfu/utils": "^0.4.0",
+    "@types/debug": "^4.1.7",
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "^17.0.5",
+    "bumpp": "^7.1.1",
+    "eslint": "^8.5.0",
+    "esno": "^0.13.0",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.5.4",
+    "unbuild": "^0.6.7",
+    "unplugin-auto-import": "^0.5.5",
+    "vite": "^2.7.10"
+  },
+  "peerDependencies": {
+    "vite": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
