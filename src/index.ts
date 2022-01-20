@@ -1,7 +1,6 @@
-import { magenta } from 'kolorist'
+import { lightMagenta, lightRed, lightYellow } from 'kolorist'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { parseURL } from 'ufo'
-import { createFilter } from '@rollup/pluginutils'
 import rollupPluginStrip from '@rollup/plugin-strip'
 
 const virtualId = 'virtual:terminal'
@@ -29,7 +28,7 @@ export interface Options {
 
 function pluginTerminal(options: Options = {}) {
   const {
-    include = /.[js|ts|mjs|cjs|mts|cts]/,
+    include = /.+\.(js|ts|mjs|cjs|mts|cts)/,
     exclude,
   } = options
 
@@ -54,8 +53,15 @@ function pluginTerminal(options: Options = {}) {
     configureServer(server: ViteDevServer) {
       server.middlewares.use('/__terminal', (req, res) => {
         const { pathname, search } = parseURL(req.url)
+        const message = decodeURI(search.slice(1))
+
         if (pathname === '/log')
-          config.logger.info(magenta(`  » ${decodeURI(search.slice(1))}`))
+          config.logger.info(lightMagenta(`  » ${message}`))
+        if (pathname === '/warn')
+          config.logger.info(lightYellow(`  » ${message}`))
+        else if (pathname === '/error')
+          config.logger.info(lightRed(`  » ${message}`))
+
         res.end()
       })
     },
@@ -64,7 +70,7 @@ function pluginTerminal(options: Options = {}) {
     ...rollupPluginStrip({
       include,
       exclude,
-      functions: ['terminal.log'],
+      functions: ['log', 'warn', 'error'].map(name => `terminal.${name}`),
     }),
     apply: 'build',
   }
@@ -72,14 +78,19 @@ function pluginTerminal(options: Options = {}) {
 }
 
 function generateVirtualModuleCode() {
-  return `export const log = ${log.toString()}
-export const terminal = { log }
+  return `export const terminal = ${createTerminal.toString()}()
 export default terminal
 `
 }
-
-function log(message: string) {
-  fetch(`/__terminal/log?${encodeURI(message)}`)
+function createTerminal() {
+  function send(type: string, message: string) {
+    fetch(`/__terminal/${type}?${encodeURI(message)}`)
+  }
+  return {
+    log: (message: string) => send('log', message),
+    warn: (message: string) => send('warn', message),
+    error: (message: string) => send('error', message),
+  }
 }
 
 export default pluginTerminal

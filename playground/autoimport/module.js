@@ -1,5 +1,3 @@
-import terminal from 'virtual:terminal'
-
 terminal.warn('Watch out, warning from the browser')
 
 setTimeout(() => {
