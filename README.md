@@ -37,6 +37,15 @@ terminal.log('Hey terminal! A message from the browser')
 
 The terminal log calls will be removed when building the app.
 
+## API
+
+Supported methods:
+- `terminal.log(obj)`
+- `terminal.info(obj)`
+- `terminal.warn(obj)`
+- `terminal.error(obj)`
+- `terminal.assert(assertion, obj)`
+
 ## Credits
 
 - Original idea from [Domenic Elm](https://twitter.com/elmd_)
