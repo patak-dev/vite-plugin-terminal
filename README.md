@@ -6,7 +6,7 @@ Log in the node terminal from the browser
 
 ![](https://github.com/patak-dev/vite-plugin-terminal/blob/76fb5c2656e99a8619986be2bff5c26414273a66/vite-plugin-terminal.png)
 
-[Open a playground online in StackBlitz](https://stackblitz.com/edit/vitejs-vite-c8dfaq?file=main.js&terminal=dev)
+[Open a playground online in StackBlitz](https://stackblitz.com/fork/github-bdbxen-madd1h?file=module.js&terminal=dev)
 
 ## Install
 
@@ -47,6 +47,12 @@ Supported methods:
 - `terminal.warn(obj)`
 - `terminal.error(obj)`
 - `terminal.assert(assertion, obj)`
+
+## Examples
+
+- **[Basic](https://stackblitz.com/fork/github-bdbxen-madd1h?file=module.js&terminal=dev)** - Playground using every available method.
+- **[Auto Import](https://stackblitz.com/fork/github-ejosid?file=main.ts&terminal=dev)** - Use [unplugin-auto-import](https://github.com/antfu/unplugin-auto-import) to make `terminal` global in your app.
+- **[Vue](https://stackblitz.com/fork/github-gzl5vm?file=src%2FApp.vue&terminal=dev)** - Example of logging to the terminal from a Vue App.
 
 ## Credits
 
