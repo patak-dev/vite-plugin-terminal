@@ -66,9 +66,9 @@ function pluginTerminal(options: Options = {}) {
         const { pathname, search } = parseURL(req.url)
         const message = decodeURI(search.slice(1)).split('\n').join('\n  ')
         if (pathname[0] === '/') {
-          const method = pathname.slice(1)
+          const method = pathname.slice(1) as Method
           if (methods.includes(method)) {
-            const color = colors[method as Method]
+            const color = colors[method]
             config.logger.info(color(`» ${message}`))
           }
         }
