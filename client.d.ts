@@ -1,12 +1,11 @@
 declare module 'virtual:terminal' {
-  export type Message = string | Record<string, unknown>
-  
+
   export const terminal: {
-    log: (message: Message) => void
-    warn: (message: Message) => void
-    error: (message: Message) => void
-    info: (message: Message) => void
-    assert: (assertion: boolean, message: Message) => void
+    log: (obj: any) => void
+    warn: (obj: any) => void
+    error: (obj: any) => void
+    info: (obj: any) => void
+    assert: (assertion: boolean, obj: any) => void
   }
   export default terminal
 }
