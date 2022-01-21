@@ -54,6 +54,31 @@ Supported methods:
 - **[Auto Import](https://stackblitz.com/fork/github-ejosid?file=main.ts&terminal=dev)** - Use [unplugin-auto-import](https://github.com/antfu/unplugin-auto-import) to make `terminal` global in your app.
 - **[Vue](https://stackblitz.com/fork/github-gzl5vm?file=src%2FApp.vue&terminal=dev)** - Example of logging to the terminal from a Vue App.
 
+## Options
+
+### `strip`
+
+Type: `boolean`<br>
+Default: `true`<br>
+
+Strip `terminal.*()` when bundling for production.
+
+### `include`
+
+Type: `String | RegExp | Array[...String|RegExp]`<br>
+Default: `/.+\.(js|ts|mjs|cjs|mts|cts)/`<br>
+Example: `include: '**/*.(mjs|js)',`<br>
+
+A pattern, or array of patterns, which specify the files in the build the plugin should operate on when removing calls for production.
+
+### `exclude`
+
+Type: `String | RegExp | Array[...String|RegExp]`<br>
+Default: `[]`<br>
+Example: `exlude: 'tests/**/*',`<br>
+
+A pattern, or array of patterns, which specify the files in the build the plugin should _ignore_ when removing calls for production.
+
 ## Credits
 
 - Original idea from [Domenic Elm](https://twitter.com/elmd_)
