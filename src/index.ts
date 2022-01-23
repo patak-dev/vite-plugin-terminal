@@ -2,6 +2,7 @@ import { lightGray, lightGreen, lightMagenta, lightRed, lightYellow } from 'kolo
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { parseURL } from 'ufo'
 import rollupPluginStrip from '@rollup/plugin-strip'
+import table from './table'
 
 const virtualId = 'virtual:terminal'
 const virtualResolvedId = `\0${virtualId}`
@@ -26,15 +27,15 @@ export interface Options {
   exclude?: FilterPattern
 }
 
-const methods = ['info', 'log', 'warn', 'error', 'assert'] as const
+const methods = ['assert', 'error', 'info', 'log', 'table', 'warn'] as const
 type Method = typeof methods[number]
 
 const colors = {
+  assert: lightGreen,
+  error: lightRed,
   info: lightGray,
   log: lightMagenta,
   warn: lightYellow,
-  error: lightRed,
-  assert: lightGreen,
 }
 
 function pluginTerminal(options: Options = {}) {
@@ -68,8 +69,19 @@ function pluginTerminal(options: Options = {}) {
         if (pathname[0] === '/') {
           const method = pathname.slice(1) as Method
           if (methods.includes(method)) {
-            const color = colors[method]
-            config.logger.info(color(`» ${message}`))
+            switch (method) {
+              case 'table': {
+                const obj = JSON.parse(message)
+                const indent = 2
+                config.logger.info(`» ${table(obj, indent)}`)
+                break
+              }
+              default: {
+                const color = colors[method]
+                config.logger.info(color(`» ${message}`))
+                break
+              }
+            }
           }
         }
         res.end()
@@ -98,11 +110,12 @@ function createTerminal() {
     fetch(`/__terminal/${type}?${encodeURI(message)}`)
   }
   return {
+    assert: (assertion: boolean, obj: any) => assertion && send('assert', obj),
+    error: (obj: any) => send('error', obj),
     info: (obj: any) => send('info', obj),
     log: (obj: any) => send('log', obj),
+    table: (obj: any) => send('table', obj),
     warn: (obj: any) => send('warn', obj),
-    error: (obj: any) => send('error', obj),
-    assert: (assertion: boolean, obj: any) => assertion && send('assert', obj),
   }
 }
 

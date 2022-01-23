@@ -46,6 +46,7 @@ Supported methods:
 - `terminal.info(obj)`
 - `terminal.warn(obj)`
 - `terminal.error(obj)`
+- `terminal.table(obj)`
 - `terminal.assert(assertion, obj)`
 
 ## Examples

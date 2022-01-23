@@ -11,3 +11,5 @@ terminal.assert(true, 'Assertion pass')
 terminal.assert(false, 'Assertion fails')
 
 terminal.info('Some info from the app')
+
+terminal.table(['vite', 'plugin', 'terminal'])
