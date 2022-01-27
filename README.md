@@ -42,7 +42,9 @@ The terminal log calls will be removed when building the app.
 ## API
 
 Supported methods:
+
 - `terminal.log(obj)`
+- `terminal.log(obj1, obj2, ...)`
 - `terminal.info(obj)`
 - `terminal.warn(obj)`
 - `terminal.error(obj)`
