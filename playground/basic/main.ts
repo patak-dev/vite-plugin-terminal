@@ -6,7 +6,7 @@ terminal.log('Hey terminal! A message from the browser')
 const json = { foo: 'bar' }
 
 terminal.log({ json })
-
+terminal.log('Firest arg', 'Second arg')
 terminal.assert(true, 'Assertion pass')
 terminal.assert(false, 'Assertion fails')
 

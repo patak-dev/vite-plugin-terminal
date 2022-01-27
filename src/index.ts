@@ -76,6 +76,13 @@ function pluginTerminal(options: Options = {}) {
                 config.logger.info(`» ${table(obj, indent)}`)
                 break
               }
+              case 'log': {
+                let obj = JSON.parse(message)
+                if (Array.isArray(obj))
+                  obj = obj.length === 1 ? JSON.stringify(obj[0], null, 2) : obj.toString()
+                config.logger.info(colors.log(`» ${obj}`))
+                break
+              }
               default: {
                 const color = colors[method]
                 config.logger.info(color(`» ${message}`))
@@ -113,7 +120,7 @@ function createTerminal() {
     assert: (assertion: boolean, obj: any) => assertion && send('assert', obj),
     error: (obj: any) => send('error', obj),
     info: (obj: any) => send('info', obj),
-    log: (obj: any) => send('log', obj),
+    log: (...obj: any[]) => send('log', obj),
     table: (obj: any) => send('table', obj),
     warn: (obj: any) => send('warn', obj),
   }
