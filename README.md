@@ -46,8 +46,9 @@ Supported methods:
 - `terminal.info(obj1 [, obj2, ..., objN])`
 - `terminal.warn(obj1 [, obj2, ..., objN])`
 - `terminal.error(obj1 [, obj2, ..., objN])`
+- `terminal.assert(assertion, obj1 [, obj2, ..., objN])`
 - `terminal.table(obj)`
-- `terminal.assert(assertion, obj)`
+
 
 ## Examples
 

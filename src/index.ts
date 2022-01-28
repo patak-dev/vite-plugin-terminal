@@ -105,30 +105,27 @@ export default terminal
 `
 }
 function createTerminal() {
-  function send(type: string, ...obj: any[]) {
+  function send(type: string, ...objs: any[]) {
     switch (type) {
       case 'table': {
-        const message = JSON.stringify(obj[0], null, 2)
+        const message = JSON.stringify(objs[0], null, 2)
         fetch(`/__terminal/${type}?${encodeURI(message)}`)
         break
       }
       default: {
-        let message = ''
-        if (obj.length > 1)
-          message = obj.join(', ')
-        else if (obj.length === 1)
-          message = typeof obj[0] === 'object' ? `${JSON.stringify(obj[0], null, 2)}` : obj[0].toString()
+        const obj = objs.length > 1 ? objs.join(' ') : objs[0]
+        const message = typeof obj === 'object' ? `${JSON.stringify(obj, null, 2)}` : obj.toString()
         fetch(`/__terminal/${type}?${encodeURI(message)}`)
       }
     }
   }
   return {
-    assert: (assertion: boolean, obj: any) => assertion && send('assert', obj),
-    error: (...obj: any[]) => send('error', ...obj),
-    info: (...obj: any[]) => send('info', ...obj),
-    log: (...obj: any[]) => send('log', ...obj),
+    log: (...objs: any[]) => send('log', ...objs),
+    info: (...objs: any[]) => send('info', ...objs),
+    warn: (...objs: any[]) => send('warn', ...objs),
+    error: (...objs: any[]) => send('error', ...objs),
+    assert: (assertion: boolean, ...objs: any[]) => assertion && send('assert', ...objs),
     table: (obj: any) => send('table', obj),
-    warn: (...obj: any[]) => send('warn', ...obj),
   }
 }
 
