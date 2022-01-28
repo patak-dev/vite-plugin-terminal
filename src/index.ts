@@ -3,7 +3,7 @@ import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { parseURL } from 'ufo'
 import rollupPluginStrip from '@rollup/plugin-strip'
 import table from './table'
-import { dispatchLog } from './logQueue'
+import { dispatchLog, restartQueue } from './logQueue'
 
 const virtualId = 'virtual:terminal'
 const virtualResolvedId = `\0${virtualId}`
@@ -28,7 +28,7 @@ export interface Options {
   exclude?: FilterPattern
 }
 
-const methods = ['assert', 'error', 'info', 'log', 'table', 'warn'] as const
+const methods = ['assert', 'error', 'info', 'log', 'table', 'warn', 'restartQueue'] as const
 type Method = typeof methods[number]
 
 const colors = {
@@ -72,6 +72,10 @@ function pluginTerminal(options: Options = {}) {
           const method = pathname.slice(1) as Method
           if (methods.includes(method)) {
             switch (method) {
+              case 'restartQueue': {
+                restartQueue()
+                break
+              }
               case 'table': {
                 const obj = JSON.parse(message)
                 const indent = 2
@@ -107,8 +111,9 @@ export default terminal
 `
 }
 function createTerminal() {
-  let queueOrder = 0
+  fetch('/__terminal/restartQueue')
 
+  let queueOrder = 0
   function send(type: string, ...obj: any[]) {
     switch (type) {
       case 'table': {

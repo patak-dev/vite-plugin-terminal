@@ -3,7 +3,7 @@ interface QueuedLog {
   dispatchFunction: () => void
 }
 
-const queue: QueuedLog[] = []
+let queue: QueuedLog[] = []
 let lastDispatched = 0
 
 const dispatchLog = ({ priority, dispatchFunction }: QueuedLog) => {
@@ -17,4 +17,9 @@ const dispatchLog = ({ priority, dispatchFunction }: QueuedLog) => {
   }
 }
 
-export { dispatchLog }
+const restartQueue = () => {
+  queue = []
+  lastDispatched = 0
+}
+
+export { dispatchLog, restartQueue }
