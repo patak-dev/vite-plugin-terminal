@@ -3,6 +3,7 @@ import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { parseURL } from 'ufo'
 import rollupPluginStrip from '@rollup/plugin-strip'
 import table from './table'
+import { dispatchLog } from './logQueue'
 
 const virtualId = 'virtual:terminal'
 const virtualResolvedId = `\0${virtualId}`
@@ -65,7 +66,8 @@ function pluginTerminal(options: Options = {}) {
     configureServer(server: ViteDevServer) {
       server.middlewares.use('/__terminal', (req, res) => {
         const { pathname, search } = parseURL(req.url)
-        const message = decodeURI(search.slice(1)).split('\n').join('\n  ')
+        const [messageURL, queueOrder] = search.slice(1).split('&')
+        const message = decodeURI(messageURL).split('\n').join('\n  ')
         if (pathname[0] === '/') {
           const method = pathname.slice(1) as Method
           if (methods.includes(method)) {
@@ -73,12 +75,12 @@ function pluginTerminal(options: Options = {}) {
               case 'table': {
                 const obj = JSON.parse(message)
                 const indent = 2
-                config.logger.info(`» ${table(obj, indent)}`)
+                dispatchLog({ priority: parseInt(queueOrder), dispatchFunction: () => config.logger.info(`» ${table(obj, indent)}`) })
                 break
               }
               default: {
                 const color = colors[method]
-                config.logger.info(color(`» ${message}`))
+                dispatchLog({ priority: parseInt(queueOrder), dispatchFunction: () => config.logger.info(color(`» ${message}`)) })
                 break
               }
             }
@@ -105,11 +107,13 @@ export default terminal
 `
 }
 function createTerminal() {
+  let queueOrder = 0
+
   function send(type: string, ...obj: any[]) {
     switch (type) {
       case 'table': {
         const message = JSON.stringify(obj[0], null, 2)
-        fetch(`/__terminal/${type}?${encodeURI(message)}`)
+        fetch(`/__terminal/${type}?${encodeURI(message)}&${queueOrder++}`)
         break
       }
       default: {
@@ -118,7 +122,7 @@ function createTerminal() {
           message = obj.join(', ')
         else if (obj.length === 1)
           message = typeof obj[0] === 'object' ? `${JSON.stringify(obj[0], null, 2)}` : obj[0].toString()
-        fetch(`/__terminal/${type}?${encodeURI(message)}`)
+        fetch(`/__terminal/${type}?${encodeURI(message)}&${queueOrder++}`)
       }
     }
   }
