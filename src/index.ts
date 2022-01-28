@@ -104,17 +104,24 @@ function generateVirtualModuleCode() {
 export default terminal
 `
 }
+
 function createTerminal() {
+  function stringify(obj: any) {
+    return typeof obj === 'object' ? `${JSON.stringify(obj)}` : obj.toString()
+  }
+  function prettyPrint(obj: any) {
+    return JSON.stringify(obj, null, 2)
+  }
   function send(type: string, ...objs: any[]) {
     switch (type) {
       case 'table': {
-        const message = JSON.stringify(objs[0], null, 2)
+        const message = prettyPrint(objs[0])
         fetch(`/__terminal/${type}?${encodeURI(message)}`)
         break
       }
       default: {
-        const obj = objs.length > 1 ? objs.join(' ') : objs[0]
-        const message = typeof obj === 'object' ? `${JSON.stringify(obj, null, 2)}` : obj.toString()
+        const obj = objs.length > 1 ? objs.map(stringify).join(' ') : objs[0]
+        const message = typeof obj === 'object' ? `${prettyPrint(obj)}` : obj.toString()
         fetch(`/__terminal/${type}?${encodeURI(message)}`)
       }
     }
