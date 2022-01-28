@@ -43,11 +43,11 @@ The terminal log calls will be removed when building the app.
 
 Supported methods:
 
-- `terminal.log(obj)`
+- `terminal.log(obj1 [, obj2, ..., objN])`
+- `terminal.info(obj1 [, obj2, ..., objN])`
+- `terminal.warn(obj1 [, obj2, ..., objN])`
+- `terminal.error(obj1 [, obj2, ..., objN])`
 - `terminal.log(obj1, obj2, ...)`
-- `terminal.info(obj)`
-- `terminal.warn(obj)`
-- `terminal.error(obj)`
 - `terminal.table(obj)`
 - `terminal.assert(assertion, obj)`
 

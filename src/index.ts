@@ -76,13 +76,6 @@ function pluginTerminal(options: Options = {}) {
                 config.logger.info(`» ${table(obj, indent)}`)
                 break
               }
-              case 'log': {
-                let obj = JSON.parse(message)
-                if (Array.isArray(obj))
-                  obj = obj.length === 1 ? JSON.stringify(obj[0], null, 2) : obj.toString()
-                config.logger.info(colors.log(`» ${obj}`))
-                break
-              }
               default: {
                 const color = colors[method]
                 config.logger.info(color(`» ${message}`))
@@ -112,17 +105,30 @@ export default terminal
 `
 }
 function createTerminal() {
-  function send(type: string, obj: any) {
-    const message = typeof obj === 'object' ? `${JSON.stringify(obj, null, 2)}` : obj.toString()
-    fetch(`/__terminal/${type}?${encodeURI(message)}`)
+  function send(type: string, ...obj: any[]) {
+    switch (type) {
+      case 'table': {
+        const message = JSON.stringify(obj[0], null, 2)
+        fetch(`/__terminal/${type}?${encodeURI(message)}`)
+        break
+      }
+      default: {
+        let message = ''
+        if (obj.length > 1)
+          message = obj.join(', ')
+        else if (obj.length === 1)
+          message = typeof obj[0] === 'object' ? `${JSON.stringify(obj[0], null, 2)}` : obj[0].toString()
+        fetch(`/__terminal/${type}?${encodeURI(message)}`)
+      }
+    }
   }
   return {
     assert: (assertion: boolean, obj: any) => assertion && send('assert', obj),
-    error: (obj: any) => send('error', obj),
-    info: (obj: any) => send('info', obj),
-    log: (...obj: any[]) => send('log', obj),
+    error: (...obj: any[]) => send('error', ...obj),
+    info: (...obj: any[]) => send('info', ...obj),
+    log: (...obj: any[]) => send('log', ...obj),
     table: (obj: any) => send('table', obj),
-    warn: (obj: any) => send('warn', obj),
+    warn: (...obj: any[]) => send('warn', ...obj),
   }
 }
 
