@@ -32,11 +32,11 @@ const methods = ['assert', 'error', 'info', 'log', 'table', 'warn', 'restartQueu
 type Method = typeof methods[number]
 
 const colors = {
-  assert: lightGreen,
-  error: lightRed,
-  info: lightGray,
   log: lightMagenta,
+  info: lightGray,
   warn: lightYellow,
+  error: lightRed,
+  assert: lightRed,
 }
 
 function pluginTerminal(options: Options = {}) {
@@ -84,7 +84,7 @@ function pluginTerminal(options: Options = {}) {
               }
               default: {
                 const color = colors[method]
-                dispatchLog({ priority: parseInt(queueOrder), dispatchFunction: () => config.logger.info(color(`» ${message}`)) })
+                dispatchLog({ priority: parseInt(queueOrder), dispatchFunction: () => config.logger.info(color(`» ${method === 'assert' ? 'Assertion failed: ' : ''}${message}`)) })
                 break
               }
             }
@@ -138,7 +138,7 @@ function createTerminal() {
     info: (...objs: any[]) => send('info', ...objs),
     warn: (...objs: any[]) => send('warn', ...objs),
     error: (...objs: any[]) => send('error', ...objs),
-    assert: (assertion: boolean, ...objs: any[]) => assertion && send('assert', ...objs),
+    assert: (assertion: boolean, ...objs: any[]) => !assertion && send('assert', ...objs),
     table: (obj: any) => send('table', obj),
   }
 }
