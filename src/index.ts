@@ -112,32 +112,34 @@ export default terminal
 }
 function createTerminal() {
   fetch('/__terminal/restartQueue')
-
   let queueOrder = 0
-  function send(type: string, ...obj: any[]) {
+  function stringify(obj: any) {
+    return typeof obj === 'object' ? `${JSON.stringify(obj)}` : obj.toString()
+  }
+  function prettyPrint(obj: any) {
+    return JSON.stringify(obj, null, 2)
+  }
+  function send(type: string, ...objs: any[]) {
     switch (type) {
       case 'table': {
-        const message = JSON.stringify(obj[0], null, 2)
+        const message = prettyPrint(objs[0])
         fetch(`/__terminal/${type}?${encodeURI(message)}&${queueOrder++}`)
         break
       }
       default: {
-        let message = ''
-        if (obj.length > 1)
-          message = obj.join(', ')
-        else if (obj.length === 1)
-          message = typeof obj[0] === 'object' ? `${JSON.stringify(obj[0], null, 2)}` : obj[0].toString()
+        const obj = objs.length > 1 ? objs.map(stringify).join(' ') : objs[0]
+        const message = typeof obj === 'object' ? `${prettyPrint(obj)}` : obj.toString()
         fetch(`/__terminal/${type}?${encodeURI(message)}&${queueOrder++}`)
       }
     }
   }
   return {
-    assert: (assertion: boolean, obj: any) => assertion && send('assert', obj),
-    error: (...obj: any[]) => send('error', ...obj),
-    info: (...obj: any[]) => send('info', ...obj),
-    log: (...obj: any[]) => send('log', ...obj),
+    log: (...objs: any[]) => send('log', ...objs),
+    info: (...objs: any[]) => send('info', ...objs),
+    warn: (...objs: any[]) => send('warn', ...objs),
+    error: (...objs: any[]) => send('error', ...objs),
+    assert: (assertion: boolean, ...objs: any[]) => assertion && send('assert', ...objs),
     table: (obj: any) => send('table', obj),
-    warn: (...obj: any[]) => send('warn', ...obj),
   }
 }
 
