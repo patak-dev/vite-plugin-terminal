@@ -5,6 +5,10 @@ terminal.log('Hey terminal! A message from the browser')
 
 const json = { foo: 'bar' }
 
+terminal.group()
+terminal.log('Grouped log')
+terminal.groupEnd()
+
 terminal.log({ json })
 terminal.log('First arg', { second: 'arg' })
 terminal.assert(true, 'Assertion pass')

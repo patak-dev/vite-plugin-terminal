@@ -47,6 +47,8 @@ Supported methods:
 - `terminal.warn(obj1 [, obj2, ..., objN])`
 - `terminal.error(obj1 [, obj2, ..., objN])`
 - `terminal.assert(assertion, obj1 [, obj2, ..., objN])`
+- `terminal.group()`
+- `terminal.groupEnd()`
 - `terminal.table(obj)`
 
 

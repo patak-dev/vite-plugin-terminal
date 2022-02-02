@@ -6,6 +6,8 @@ declare module 'virtual:terminal' {
     log: (...obj: any[]) => void
     table: (obj: any) => void
     warn: (...obj: any[]) => void
+    group: () => void
+    groupEnd: () => void
   }
   export default terminal
 }
