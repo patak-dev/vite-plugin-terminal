@@ -121,7 +121,6 @@ function generateVirtualModuleCode() {
 export default terminal
 `
 }
-
 function createTerminal() {
   let queueOrder = 0
   let groupLevel = 0
