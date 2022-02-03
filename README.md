@@ -50,6 +50,9 @@ Supported methods:
 - `terminal.group()`
 - `terminal.groupEnd()`
 - `terminal.table(obj)`
+- `terminal.time(timerId)`
+- `terminal.timeLog(timerId)`
+- `terminal.timeEnd(timerId)`
 
 
 ## Examples

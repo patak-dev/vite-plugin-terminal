@@ -10,6 +10,9 @@ const virtualResolvedId = `\0${virtualId}`
 
 export type FilterPattern = ReadonlyArray<string | RegExp> | string | RegExp | null
 
+interface TimerMap {
+  [key: string]: number
+}
 export interface Options {
   /**
    * Remove logs in production
@@ -118,14 +121,41 @@ function generateVirtualModuleCode() {
 export default terminal
 `
 }
+
 function createTerminal() {
   let queueOrder = 0
   let groupLevel = 0
+  const timers: TimerMap = {}
+
+  const addTimer = (timerId: string) => {
+    timers[timerId] = performance.now()
+  }
+
+  const getTimer = (timerId: string) => {
+    return performance.now() - timers[timerId]
+  }
+
+  const finishTimer = (timerId: string) => {
+    const time = timers[timerId]
+    delete timers[timerId]
+    return performance.now() - time
+  }
+
+  const getTimersIds = () => {
+    return Object.keys(timers)
+  }
+
   function stringify(obj: any) {
     return typeof obj === 'object' ? `${JSON.stringify(obj)}` : obj.toString()
   }
   function prettyPrint(obj: any) {
     return JSON.stringify(obj, null, 2)
+  }
+  function getTime(id: string, funcToCall: (id: string) => number) {
+    if (getTimersIds().includes(id))
+      return `${id}: ${funcToCall(id)} ms`
+    else
+      return `Timer ${id} doesn't exist`
   }
   function send(type: string, ...objs: any[]) {
     switch (type) {
@@ -140,6 +170,20 @@ function createTerminal() {
       }
       case 'groupEnd': {
         groupLevel && --groupLevel
+        break
+      }
+      case 'time': {
+        addTimer(objs[0])
+        break
+      }
+      case 'timeLog': {
+        const message = getTime(objs[0], getTimer)
+        fetch(`/__terminal/log?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}&gl=${groupLevel}`)
+        break
+      }
+      case 'timeEnd': {
+        const message = getTime(objs[0], finishTimer)
+        fetch(`/__terminal/log?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}&gl=${groupLevel}`)
         break
       }
       default: {
@@ -160,6 +204,9 @@ function createTerminal() {
     table: (obj: any) => send('table', obj),
     group: () => send('group'),
     groupEnd: () => send('groupEnd'),
+    time: (obj: any) => send('time', obj),
+    timeLog: (obj: any) => send('timeLog', obj),
+    timeEnd: (obj: any) => send('timeEnd', obj),
   }
 }
 
