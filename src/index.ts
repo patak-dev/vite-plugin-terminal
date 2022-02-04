@@ -39,6 +39,13 @@ const colors = {
   assert: lightRed,
 }
 
+const groupText = (text: string, groupLevel: number) => {
+  if (groupLevel !== 0)
+    return `${'  '.repeat(groupLevel)}${text.split('\n').join(`\n${'  '.repeat(groupLevel)}`)}`
+  else
+    return text
+}
+
 function pluginTerminal(options: Options = {}) {
   const {
     include = /.+\.(js|ts|mjs|cjs|mts|cts)/,
@@ -68,23 +75,24 @@ function pluginTerminal(options: Options = {}) {
         const { pathname, search } = parseURL(req.url)
         const searchParams = new URLSearchParams(search.slice(1))
         const messageURL = searchParams.get('m') ?? ''
-        const time = searchParams.get('t') ?? '0'
-        const queueOrder = searchParams.get('q') ?? '0'
+        const time = parseInt(searchParams.get('t') ?? '0')
+        const queueOrder = parseInt(searchParams.get('q') ?? '0')
+        const groupLevel = parseInt(searchParams.get('gl') ?? '0')
         const message = decodeURI(messageURL).split('\n').join('\n  ')
         if (pathname[0] === '/') {
           const method = pathname.slice(1) as Method
           if (methods.includes(method)) {
             switch (method) {
               case 'table': {
-                const groupLevel = searchParams.get('gl') ?? '0'
                 const obj = JSON.parse(message)
-                const indent = 2 * (parseInt(groupLevel) + 1)
-                dispatchLog({ priority: parseInt(time), queueOrder: parseInt(queueOrder), dispatchFunction: () => config.logger.info(`» ${table(obj, indent)}`) })
+                const indent = 2 * (groupLevel + 1)
+                dispatchLog({ priority: time, queueOrder, dispatchFunction: () => config.logger.info(`» ${table(obj, indent)}`) })
                 break
               }
               default: {
                 const color = colors[method]
-                dispatchLog({ priority: parseInt(time), queueOrder: parseInt(queueOrder), dispatchFunction: () => config.logger.info(color(`» ${message}`)) })
+                const groupedMessage = groupText(message, groupLevel)
+                dispatchLog({ priority: time, queueOrder, dispatchFunction: () => config.logger.info(color(`» ${groupedMessage}`)) })
                 break
               }
             }
@@ -119,12 +127,6 @@ function createTerminal() {
   function prettyPrint(obj: any) {
     return JSON.stringify(obj, null, 2)
   }
-  const groupText = (text: string) => {
-    if (groupLevel !== 0)
-      return `${'  '.repeat(groupLevel)}${text.split('\n').join(`\n${'  '.repeat(groupLevel)}`)}`
-    else
-      return text
-  }
   function send(type: string, ...objs: any[]) {
     switch (type) {
       case 'table': {
@@ -137,7 +139,7 @@ function createTerminal() {
         break
       }
       case 'groupEnd': {
-        groupLevel = groupLevel === 0 ? groupLevel : --groupLevel
+        groupLevel && --groupLevel
         break
       }
       default: {
@@ -145,8 +147,7 @@ function createTerminal() {
         let message = typeof obj === 'object' ? `${prettyPrint(obj)}` : obj.toString()
         const prefix = type === 'assert' ? 'Assertion failed: ' : ''
         message = prefix + message
-        message = groupText(message)
-        fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}`)
+        fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}&gl=${groupLevel}`)
       }
     }
   }
