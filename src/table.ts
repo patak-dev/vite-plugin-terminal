@@ -77,7 +77,7 @@ export function renderTable(rows: string[][], width: number, indent = 0) {
     table.push(renderSeparator(chars))
   })
 
-  return table.join(`\n${' '.repeat(indent)}`)
+  return `${' '.repeat(indent - 2)}${table.join(`\n${' '.repeat(indent)}`)}`
 }
 
 function isObj(obj: any) {

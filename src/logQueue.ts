@@ -17,9 +17,8 @@ const dispatchLog = ({ priority, queueOrder, dispatchFunction }: QueuedLog) => {
   })
   if (priority < lastDispatched) {
     setTimeout(() => {
-      while (queue[0] && queue[0].priority < lastDispatched) {
+      while (queue[0] && queue[0].priority < lastDispatched)
         queue.shift()!.dispatchFunction()
-      }
     }, 50)
   }
   lastDispatched++

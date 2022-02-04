@@ -39,6 +39,13 @@ const colors = {
   assert: lightRed,
 }
 
+const groupText = (text: string, groupLevel: number) => {
+  if (groupLevel !== 0)
+    return `${'  '.repeat(groupLevel)}${text.split('\n').join(`\n${'  '.repeat(groupLevel)}`)}`
+  else
+    return text
+}
+
 function pluginTerminal(options: Options = {}) {
   const {
     include = /.+\.(js|ts|mjs|cjs|mts|cts)/,
@@ -68,8 +75,9 @@ function pluginTerminal(options: Options = {}) {
         const { pathname, search } = parseURL(req.url)
         const searchParams = new URLSearchParams(search.slice(1))
         const messageURL = searchParams.get('m') ?? ''
-        const time = searchParams.get('t') ?? ''
-        const queueOrder = searchParams.get('q') ?? ''
+        const time = parseInt(searchParams.get('t') ?? '0')
+        const queueOrder = parseInt(searchParams.get('q') ?? '0')
+        const groupLevel = parseInt(searchParams.get('gl') ?? '0')
         const message = decodeURI(messageURL).split('\n').join('\n  ')
         if (pathname[0] === '/') {
           const method = pathname.slice(1) as Method
@@ -77,13 +85,14 @@ function pluginTerminal(options: Options = {}) {
             switch (method) {
               case 'table': {
                 const obj = JSON.parse(message)
-                const indent = 2
-                dispatchLog({ priority: parseInt(time), queueOrder: parseInt(queueOrder), dispatchFunction: () => config.logger.info(`» ${table(obj, indent)}`) })
+                const indent = 2 * (groupLevel + 1)
+                dispatchLog({ priority: time, queueOrder, dispatchFunction: () => config.logger.info(`» ${table(obj, indent)}`) })
                 break
               }
               default: {
                 const color = colors[method]
-                dispatchLog({ priority: parseInt(time), queueOrder: parseInt(queueOrder), dispatchFunction: () => config.logger.info(color(`» ${method === 'assert' ? 'Assertion failed: ' : ''}${message}`)) })
+                const groupedMessage = groupText(message, groupLevel)
+                dispatchLog({ priority: time, queueOrder, dispatchFunction: () => config.logger.info(color(`» ${groupedMessage}`)) })
                 break
               }
             }
@@ -111,6 +120,7 @@ export default terminal
 }
 function createTerminal() {
   let queueOrder = 0
+  let groupLevel = 0
   function stringify(obj: any) {
     return typeof obj === 'object' ? `${JSON.stringify(obj)}` : obj.toString()
   }
@@ -121,13 +131,23 @@ function createTerminal() {
     switch (type) {
       case 'table': {
         const message = prettyPrint(objs[0])
-        fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}`)
+        fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}&gl=${groupLevel}`)
+        break
+      }
+      case 'group': {
+        groupLevel++
+        break
+      }
+      case 'groupEnd': {
+        groupLevel && --groupLevel
         break
       }
       default: {
         const obj = objs.length > 1 ? objs.map(stringify).join(' ') : objs[0]
-        const message = typeof obj === 'object' ? `${prettyPrint(obj)}` : obj.toString()
-        fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}`)
+        let message = typeof obj === 'object' ? `${prettyPrint(obj)}` : obj.toString()
+        const prefix = type === 'assert' ? 'Assertion failed: ' : ''
+        message = prefix + message
+        fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}&gl=${groupLevel}`)
       }
     }
   }
@@ -138,6 +158,8 @@ function createTerminal() {
     error: (...objs: any[]) => send('error', ...objs),
     assert: (assertion: boolean, ...objs: any[]) => !assertion && send('assert', ...objs),
     table: (obj: any) => send('table', obj),
+    group: () => send('group'),
+    groupEnd: () => send('groupEnd'),
   }
 }
 
