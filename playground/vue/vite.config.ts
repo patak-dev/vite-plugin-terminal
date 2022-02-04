@@ -7,4 +7,7 @@ export default defineConfig({
     vue(),
     terminal(),
   ],
+  server: {
+    open: true,
+  },
 })
