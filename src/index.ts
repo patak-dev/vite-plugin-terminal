@@ -8,9 +8,19 @@ import { dispatchLog } from './logQueue'
 const virtualId = 'virtual:terminal'
 const virtualResolvedId = `\0${virtualId}`
 
+const virtualId_console = 'virtual:terminal/console'
+const virtualResolvedId_console = `\0${virtualId_console}`
+
 export type FilterPattern = ReadonlyArray<string | RegExp> | string | RegExp | null
 
 export interface Options {
+  /**
+   * Redirect console logs to terminal
+   *
+   * @default true
+   */
+  console?: 'terminal'
+
   /**
    * Remove logs in production
    *
@@ -63,12 +73,27 @@ function pluginTerminal(options: Options = {}) {
     resolveId(id = ''): string | undefined {
       if (id === virtualId)
         return virtualResolvedId
+      if (id === virtualId_console)
+        return virtualResolvedId_console
     },
     load(id: string) {
       if (id === virtualResolvedId) {
         virtualModuleCode ||= generateVirtualModuleCode()
         return virtualModuleCode
       }
+      if (id === virtualResolvedId_console)
+        return 'import terminal from "virtual:terminal"; globalThis.console = terminal'
+    },
+    transformIndexHtml: {
+      enforce: 'pre',
+      transform() {
+        if (options.console === 'terminal') {
+          return [{
+            tag: 'script',
+            attrs: { type: 'module', src: '/@id/__x00__virtual:terminal/console' },
+          }]
+        }
+      },
     },
     configureServer(server: ViteDevServer) {
       server.middlewares.use('/__terminal', (req, res) => {

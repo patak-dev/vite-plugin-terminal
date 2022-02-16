@@ -1,0 +1,20 @@
+import { resolve } from 'path'
+import { defineConfig } from 'vite'
+import terminal from '../../src'
+
+export default defineConfig({
+  plugins: [
+    terminal({ console: 'terminal' }),
+  ],
+  build: {
+    outDir: resolve(__dirname, '../../dist/playground/console'),
+    minify: true,
+    emptyOutDir: true,
+  },
+  preview: {
+    port: 4173,
+  },
+  server: {
+    open: true,
+  },
+})

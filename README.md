@@ -50,14 +50,49 @@ Supported methods:
 - `terminal.group()`
 - `terminal.groupEnd()`
 - `terminal.table(obj)`
-- `terminal.time(timerId)`
-- `terminal.timeLog(timerId)`
-- `terminal.timeEnd(timerId)`
+- `terminal.time(id)`
+- `terminal.timeLog(id, obj1 [, obj2, ..., objN])`
+- `terminal.timeEnd(id)`
 
+## Redirect `console` logs to the terminal
+
+If you want the standard `console` logs to appear in the terminal, you can use the `console: 'terminal'` option in your `vite.config.ts`:
+
+```ts
+// vite.config.ts
+import Terminal from 'vite-plugin-terminal'
+
+export default {
+  plugins: [
+    Terminal({
+      console: 'terminal'
+    })
+  ]
+}
+```
+
+In this case, you don't need to import the virtual terminal to use the plugin.
+
+```ts
+console.log('Hey terminal! A message from the browser')
+```
+
+You can also overwrite it in your `index.html` head manually in case you would like more control.
+
+```html
+  <script type="module">
+    // Redirect console logs to the terminal
+    import terminal from 'virtual:terminal'
+    globalThis.console = terminal
+  </script>
+```
+
+Check the [Console playground](./playground/console) for a full example.
 
 ## Examples
 
 - **[Basic](https://stackblitz.com/fork/github-bdbxen-madd1h?file=module.js&terminal=dev)** - Playground using every available method.
+- **[Console](https://stackblitz.com/fork/github-bdbxen-madd1h?file=module.js&terminal=dev)** - Redirect standard console logs to the terminal.
 - **[Auto Import](https://stackblitz.com/fork/github-ejosid?file=main.ts&terminal=dev)** - Use [unplugin-auto-import](https://github.com/antfu/unplugin-auto-import) to make `terminal` global in your app.
 - **[Vue](https://stackblitz.com/fork/github-gzl5vm?file=src%2FApp.vue&terminal=dev)** - Example of logging to the terminal from a Vue App.
 
