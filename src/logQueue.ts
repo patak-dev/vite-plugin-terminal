@@ -1,27 +1,28 @@
+const DISPATCH_DELAY_TIME_MS = 50
+
 interface QueuedLog {
-  priority: number
-  queueOrder: number
-  dispatchFunction: () => void
+  time: number
+  count: number
+  run: () => void
 }
 
 const queue: QueuedLog[] = []
-let lastDispatched = Number.MAX_SAFE_INTEGER
 
-const dispatchLog = ({ priority, queueOrder, dispatchFunction }: QueuedLog) => {
-  queue.push({ priority, queueOrder, dispatchFunction })
-  queue.sort((first, second) => {
-    if (first.priority !== second.priority)
-      return first.priority - second.priority
-    else
-      return first.queueOrder - second.queueOrder
-  })
-  if (priority < lastDispatched) {
-    setTimeout(() => {
-      while (queue[0] && queue[0].priority < lastDispatched)
-        queue.shift()!.dispatchFunction()
-    }, 50)
-  }
-  lastDispatched++
+export const dispatchLog = (log: QueuedLog) => {
+  addToOrderedQueue(log)
+  setTimeout(() => {
+    // Log everything until the current log in order
+    while (queue.length && queue[0].time <= log.time)
+      queue.shift()!.run()
+  }, DISPATCH_DELAY_TIME_MS)
 }
 
-export { dispatchLog }
+function addToOrderedQueue(log: QueuedLog) {
+  const i = queue.findIndex((l) => {
+    return l.time > log.time || (l.time === log.time && l.count > log.count)
+  })
+  if (i === -1)
+    queue.push(log)
+  else
+    queue.splice(i, 0, log)
+}

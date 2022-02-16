@@ -10,9 +10,6 @@ const virtualResolvedId = `\0${virtualId}`
 
 export type FilterPattern = ReadonlyArray<string | RegExp> | string | RegExp | null
 
-interface TimerMap {
-  [key: string]: number
-}
 export interface Options {
   /**
    * Remove logs in production
@@ -77,28 +74,31 @@ function pluginTerminal(options: Options = {}) {
       server.middlewares.use('/__terminal', (req, res) => {
         const { pathname, search } = parseURL(req.url)
         const searchParams = new URLSearchParams(search.slice(1))
-        const messageURL = searchParams.get('m') ?? ''
+
+        const message = decodeURI(searchParams.get('m') ?? '').split('\n').join('\n  ')
         const time = parseInt(searchParams.get('t') ?? '0')
-        const queueOrder = parseInt(searchParams.get('q') ?? '0')
-        const groupLevel = parseInt(searchParams.get('gl') ?? '0')
-        const message = decodeURI(messageURL).split('\n').join('\n  ')
+        const count = parseInt(searchParams.get('c') ?? '0')
+        const groupLevel = parseInt(searchParams.get('g') ?? '0')
+
         if (pathname[0] === '/') {
           const method = pathname.slice(1) as Method
           if (methods.includes(method)) {
+            let run
             switch (method) {
               case 'table': {
                 const obj = JSON.parse(message)
                 const indent = 2 * (groupLevel + 1)
-                dispatchLog({ priority: time, queueOrder, dispatchFunction: () => config.logger.info(`» ${table(obj, indent)}`) })
+                run = () => config.logger.info(`» ${table(obj, indent, 2)}`)
                 break
               }
               default: {
                 const color = colors[method]
                 const groupedMessage = groupText(message, groupLevel)
-                dispatchLog({ priority: time, queueOrder, dispatchFunction: () => config.logger.info(color(`» ${groupedMessage}`)) })
+                run = () => config.logger.info(color(`» ${groupedMessage}`))
                 break
               }
             }
+            dispatchLog({ run, time, count })
           }
         }
         res.end()
@@ -121,91 +121,61 @@ function generateVirtualModuleCode() {
 export default terminal
 `
 }
+
 function createTerminal() {
-  let queueOrder = 0
+  let count = 0
   let groupLevel = 0
-  const timers: TimerMap = {}
 
-  const addTimer = (timerId: string) => {
-    timers[timerId] = performance.now()
-  }
-
-  const getTimer = (timerId: string) => {
-    return performance.now() - timers[timerId]
-  }
-
-  const finishTimer = (timerId: string) => {
-    const time = timers[timerId]
-    delete timers[timerId]
-    return performance.now() - time
-  }
-
-  const getTimersIds = () => {
-    return Object.keys(timers)
+  const timers = new Map<string, number>()
+  function getTimer(id: string) {
+    return timers.has(id)
+      ? `${id}: ${performance.now() - timers.get(id)!} ms`
+      : `Timer ${id} doesn't exist`
   }
 
   function stringify(obj: any) {
     return typeof obj === 'object' ? `${JSON.stringify(obj)}` : obj.toString()
   }
+
   function prettyPrint(obj: any) {
     return JSON.stringify(obj, null, 2)
   }
-  function getTime(id: string, funcToCall: (id: string) => number) {
-    if (getTimersIds().includes(id))
-      return `${id}: ${funcToCall(id)} ms`
-    else
-      return `Timer ${id} doesn't exist`
+
+  function stringifyObjs(objs: any[]) {
+    const obj = objs.length > 1 ? objs.map(stringify).join(' ') : objs[0]
+    return typeof obj === 'object' ? `${prettyPrint(obj)}` : obj.toString()
   }
-  function send(type: string, ...objs: any[]) {
-    switch (type) {
-      case 'table': {
-        const message = prettyPrint(objs[0])
-        fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}&gl=${groupLevel}`)
-        break
-      }
-      case 'group': {
-        groupLevel++
-        break
-      }
-      case 'groupEnd': {
-        groupLevel && --groupLevel
-        break
-      }
-      case 'time': {
-        addTimer(objs[0])
-        break
-      }
-      case 'timeLog': {
-        const message = getTime(objs[0], getTimer)
-        fetch(`/__terminal/log?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}&gl=${groupLevel}`)
-        break
-      }
-      case 'timeEnd': {
-        const message = getTime(objs[0], finishTimer)
-        fetch(`/__terminal/log?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}&gl=${groupLevel}`)
-        break
-      }
-      default: {
-        const obj = objs.length > 1 ? objs.map(stringify).join(' ') : objs[0]
-        let message = typeof obj === 'object' ? `${prettyPrint(obj)}` : obj.toString()
-        const prefix = type === 'assert' ? 'Assertion failed: ' : ''
-        message = prefix + message
-        fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&q=${queueOrder++}&gl=${groupLevel}`)
-      }
-    }
+
+  function send(type: string, message: string) {
+    fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&c=${count++}&g=${groupLevel}`)
   }
+
   return {
-    log: (...objs: any[]) => send('log', ...objs),
-    info: (...objs: any[]) => send('info', ...objs),
-    warn: (...objs: any[]) => send('warn', ...objs),
-    error: (...objs: any[]) => send('error', ...objs),
-    assert: (assertion: boolean, ...objs: any[]) => !assertion && send('assert', ...objs),
-    table: (obj: any) => send('table', obj),
-    group: () => send('group'),
-    groupEnd: () => send('groupEnd'),
-    time: (obj: any) => send('time', obj),
-    timeLog: (obj: any) => send('timeLog', obj),
-    timeEnd: (obj: any) => send('timeEnd', obj),
+    log: (...objs: any[]) => send('log', stringifyObjs(objs)),
+    info: (...objs: any[]) => send('info', stringifyObjs(objs)),
+    warn: (...objs: any[]) => send('warn', stringifyObjs(objs)),
+    error: (...objs: any[]) => send('error', stringifyObjs(objs)),
+    assert: (assertion: boolean, ...objs: any[]) => {
+      if (!assertion)
+        send('assert', `Assertion failed: ${stringifyObjs(objs)}`)
+    },
+    table: (obj: any) => send('table', prettyPrint(obj)),
+    group: () => {
+      groupLevel++
+    },
+    groupEnd: () => {
+      groupLevel && --groupLevel
+    },
+    time: (id: 'string') => {
+      timers.set(id, performance.now())
+    },
+    timeLog: (id: 'string', ...objs: any[]) => {
+      send('log', `${getTimer(id)} ${stringifyObjs(objs)}`)
+    },
+    timeEnd: (id: 'string') => {
+      send('log', getTimer(id))
+      timers.delete(id)
+    },
   }
 }
 

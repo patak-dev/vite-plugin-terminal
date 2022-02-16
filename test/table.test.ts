@@ -149,7 +149,7 @@ describe('renderTable', () => {
 
   it ('should indent', () => {
     const data = ['a']
-    expect(`» ${renderTable(createTable(data), 38, 2)}`).toBe(`
+    expect(`» ${renderTable(createTable(data), 38, 2, 2)}`).toBe(`
 » ┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓
   ┃ (index)         ┃ Values           ┃
   ┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩

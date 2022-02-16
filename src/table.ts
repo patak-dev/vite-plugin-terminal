@@ -1,9 +1,9 @@
 import { gray, lightGray, lightMagenta } from 'kolorist'
 
-export default function table(obj: any, indent: number) {
+export default function table(obj: any, indent = 0, doneFirstLineIndent = 0) {
   const table = createTable(obj)
   const maxWidth = process.stdout.columns - indent
-  return renderTable(table, maxWidth, indent)
+  return renderTable(table, maxWidth, indent, doneFirstLineIndent)
 }
 
 export function createTable(obj: any) {
@@ -34,7 +34,7 @@ export function createTable(obj: any) {
   return rows
 }
 
-export function renderTable(rows: string[][], width: number, indent = 0) {
+export function renderTable(rows: string[][], width: number, indent = 0, doneFirstLineIndent = 0) {
   const table: string[] = []
   const minCellWidth = 5
   const maxCols = Math.floor((width - 1) / (minCellWidth + 1))
@@ -77,7 +77,7 @@ export function renderTable(rows: string[][], width: number, indent = 0) {
     table.push(renderSeparator(chars))
   })
 
-  return `${' '.repeat(indent - 2)}${table.join(`\n${' '.repeat(indent)}`)}`
+  return `${' '.repeat(indent - doneFirstLineIndent)}${table.join(`\n${' '.repeat(indent)}`)}`
 }
 
 function isObj(obj: any) {
