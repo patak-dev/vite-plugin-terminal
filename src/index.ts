@@ -165,6 +165,8 @@ function createTerminal() {
   let count = 0
   let groupLevel = 0
 
+  const counters = new Map<string, number>()
+
   const timers = new Map<string, number>()
   function getTimer(id: string) {
     return timers.has(id)
@@ -191,30 +193,41 @@ function createTerminal() {
   }
 
   return {
-    log: (...objs: any[]) => send('log', stringifyObjs(objs)),
-    info: (...objs: any[]) => send('info', stringifyObjs(objs)),
-    warn: (...objs: any[]) => send('warn', stringifyObjs(objs)),
-    error: (...objs: any[]) => send('error', stringifyObjs(objs)),
-    assert: (assertion: boolean, ...objs: any[]) => {
+    log(...objs: any[]) { send('log', stringifyObjs(objs)) },
+    info(...objs: any[]) { send('info', stringifyObjs(objs)) },
+    warn(...objs: any[]) { send('warn', stringifyObjs(objs)) },
+    error(...objs: any[]) { send('error', stringifyObjs(objs)) },
+    assert(assertion: boolean, ...objs: any[]) {
       if (!assertion)
         send('assert', `Assertion failed: ${stringifyObjs(objs)}`)
     },
-    table: (obj: any) => send('table', prettyPrint(obj)),
-    group: () => {
+    table(obj: any) { send('table', prettyPrint(obj)) },
+    group() {
       groupLevel++
     },
-    groupEnd: () => {
+    groupEnd() {
       groupLevel && --groupLevel
     },
-    time: (id: 'string') => {
+    time(id: string) {
       timers.set(id, performance.now())
     },
-    timeLog: (id: 'string', ...objs: any[]) => {
+    timeLog(id: string, ...objs: any[]) {
       send('log', `${getTimer(id)} ${stringifyObjs(objs)}`)
     },
-    timeEnd: (id: 'string') => {
+    timeEnd(id: string) {
       send('log', getTimer(id))
       timers.delete(id)
+    },
+    count(label: string) {
+      const l = label || 'default'
+      const n = (counters.get(l) || 0) + 1
+      counters.set(l, n)
+      send('log', `${l}: ${n}`)
+    },
+    countReset(label: string) {
+      const l = label || 'default'
+      counters.set(l, 0)
+      send('log', `${l}: 0`)
     },
     clear() {
       send('clear')

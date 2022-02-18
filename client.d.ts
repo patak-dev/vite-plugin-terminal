@@ -8,10 +8,12 @@ declare module 'virtual:terminal' {
     warn: (...obj: any[]) => void
     group: () => void
     groupEnd: () => void
-    time: (obj: string) => void
-    timeLog: (obj: string) => void
-    timeEnd: (obj: string) => void
+    time: (id: string) => void
+    timeLog: (id: string) => void
+    timeEnd: (id: string) => void
     clear: () => void
+    count: (label?: string) => void
+    countReset: (label?: string) => void
   }
   export default terminal
 }

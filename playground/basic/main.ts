@@ -20,6 +20,13 @@ terminal.assert(false, 'Assertion fails')
 
 terminal.info('Some info from the app')
 
+terminal.count('counter A')
+terminal.count('counter A')
+terminal.count('counter B')
+terminal.countReset('counter A')
+terminal.count('counter A')
+terminal.count('counter B')
+
 terminal.table(['vite', 'plugin', 'terminal'])
 
 setTimeout(() => {
