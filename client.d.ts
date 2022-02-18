@@ -14,6 +14,8 @@ declare module 'virtual:terminal' {
     clear: () => void
     count: (label?: string) => void
     countReset: (label?: string) => void
+    dir: (object: any) => void
+    dirxml: (object: any) => void
   }
   export default terminal
 }

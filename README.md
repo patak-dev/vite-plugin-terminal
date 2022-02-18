@@ -54,6 +54,10 @@ Supported methods:
 - `terminal.timeLog(id, obj1 [, obj2, ..., objN])`
 - `terminal.timeEnd(id)`
 - `terminal.clear()`
+- `terminal.count(label)`
+- `terminal.countReset(label)`
+- `terminal.dir(obj)` 
+- `terminal.dirxml(obj)` 
 
 ## Redirect `console` logs to the terminal
 

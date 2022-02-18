@@ -232,6 +232,12 @@ function createTerminal() {
     clear() {
       send('clear')
     },
+    dir(obj: any) {
+      send('log', prettyPrint(obj))
+    },
+    dirxml(obj: any) {
+      send('log', prettyPrint(obj))
+    },
   }
 }
 
