@@ -1,3 +1,4 @@
+import readline from 'readline'
 import { lightGray, lightMagenta, lightRed, lightYellow } from 'kolorist'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { parseURL } from 'ufo'
@@ -38,7 +39,7 @@ export interface Options {
   exclude?: FilterPattern
 }
 
-const methods = ['assert', 'error', 'info', 'log', 'table', 'warn'] as const
+const methods = ['assert', 'error', 'info', 'log', 'table', 'warn', 'clear'] as const
 type Method = typeof methods[number]
 
 const colors = {
@@ -110,6 +111,19 @@ function pluginTerminal(options: Options = {}) {
           if (methods.includes(method)) {
             let run
             switch (method) {
+              case 'clear': {
+                // Use same logic as in Vite
+                run = () => {
+                  if (process.stdout.isTTY && !process.env.CI) {
+                    const repeatCount = process.stdout.rows - 2
+                    const blank = repeatCount > 0 ? '\n'.repeat(repeatCount) : ''
+                    console.log(blank)
+                    readline.cursorTo(process.stdout, 0, 0)
+                    readline.clearScreenDown(process.stdout)
+                  }
+                }
+                break
+              }
               case 'table': {
                 const obj = JSON.parse(message)
                 const indent = 2 * (groupLevel + 1)
@@ -171,8 +185,9 @@ function createTerminal() {
     return typeof obj === 'object' ? `${prettyPrint(obj)}` : obj.toString()
   }
 
-  function send(type: string, message: string) {
-    fetch(`/__terminal/${type}?m=${encodeURI(message)}&t=${Date.now()}&c=${count++}&g=${groupLevel}`)
+  function send(type: string, message?: string) {
+    const encodedMessage = message ? `&m=${encodeURI(message)}` : ''
+    fetch(`/__terminal/${type}?t=${Date.now()}&c=${count++}&g=${groupLevel}${encodedMessage}`)
   }
 
   return {
@@ -200,6 +215,9 @@ function createTerminal() {
     timeEnd: (id: 'string') => {
       send('log', getTimer(id))
       timers.delete(id)
+    },
+    clear() {
+      send('clear')
     },
   }
 }

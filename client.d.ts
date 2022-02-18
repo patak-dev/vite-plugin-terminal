@@ -11,6 +11,7 @@ declare module 'virtual:terminal' {
     time: (obj: string) => void
     timeLog: (obj: string) => void
     timeEnd: (obj: string) => void
+    clear: () => void
   }
   export default terminal
 }

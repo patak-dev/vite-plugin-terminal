@@ -53,6 +53,7 @@ Supported methods:
 - `terminal.time(id)`
 - `terminal.timeLog(id, obj1 [, obj2, ..., objN])`
 - `terminal.timeEnd(id)`
+- `terminal.clear()`
 
 ## Redirect `console` logs to the terminal
 
