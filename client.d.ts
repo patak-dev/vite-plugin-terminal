@@ -7,6 +7,7 @@ declare module 'virtual:terminal' {
     table: (obj: any) => void
     warn: (...obj: any[]) => void
     group: () => void
+    groupCollapsed: () => void
     groupEnd: () => void
     time: (id: string) => void
     timeLog: (id: string) => void
@@ -16,6 +17,9 @@ declare module 'virtual:terminal' {
     countReset: (label?: string) => void
     dir: (object: any) => void
     dirxml: (object: any) => void
+    trace: (...args: any[]) => void
+    profile: (...args: any[]) => void
+    profileEnd: (...args: any[]) => void
   }
   export default terminal
 }

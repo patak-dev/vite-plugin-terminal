@@ -4,7 +4,10 @@ import terminal from '../../src'
 
 export default defineConfig({
   plugins: [
-    terminal({ console: 'terminal' }),
+    terminal({
+      console: 'terminal',
+      output: ['terminal', 'console'],
+    }),
   ],
   build: {
     outDir: resolve(__dirname, '../../dist/playground/console'),

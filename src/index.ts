@@ -13,6 +13,8 @@ const virtualId_console = 'virtual:terminal/console'
 const virtualResolvedId_console = `\0${virtualId_console}`
 
 export type FilterPattern = ReadonlyArray<string | RegExp> | string | RegExp | null
+type OutputType = 'terminal' | 'console'
+export type LogsOutput = OutputType | OutputType[]
 
 export interface Options {
   /**
@@ -21,6 +23,13 @@ export interface Options {
    * @default true
    */
   console?: 'terminal'
+
+  /**
+   * Output for the logs
+   *
+   * @default `'terminal'`
+   */
+  output?: LogsOutput
 
   /**
    * Remove logs in production
@@ -37,6 +46,29 @@ export interface Options {
    * Filter for modules to not be processed to remove logs
    */
   exclude?: FilterPattern
+}
+
+interface Terminal {
+  assert: (assertion: boolean, obj: any) => void
+  error: (...obj: any[]) => void
+  info: (...obj: any[]) => void
+  log: (...obj: any[]) => void
+  table: (obj: any) => void
+  warn: (...obj: any[]) => void
+  group: () => void
+  groupCollapsed: () => void
+  groupEnd: () => void
+  time: (id: string) => void
+  timeLog: (id: string) => void
+  timeEnd: (id: string) => void
+  clear: () => void
+  count: (label?: string) => void
+  countReset: (label?: string) => void
+  dir: (object: any) => void
+  dirxml: (object: any) => void
+  trace: (...args: any[]) => void
+  profile: (...args: any[]) => void
+  profileEnd: (...args: any[]) => void
 }
 
 const methods = ['assert', 'error', 'info', 'log', 'table', 'warn', 'clear'] as const
@@ -79,7 +111,7 @@ function pluginTerminal(options: Options = {}) {
     },
     load(id: string) {
       if (id === virtualResolvedId) {
-        virtualModuleCode ||= generateVirtualModuleCode()
+        virtualModuleCode ||= generateVirtualModuleCode(options.output)
         return virtualModuleCode
       }
       if (id === virtualResolvedId_console)
@@ -155,15 +187,18 @@ function pluginTerminal(options: Options = {}) {
   return [terminal, options.strip !== false && strip]
 }
 
-function generateVirtualModuleCode() {
-  return `export const terminal = ${createTerminal.toString()}()
+function generateVirtualModuleCode(output?: LogsOutput | LogsOutput[]) {
+  const outputToTerminal = output ? (output === 'terminal' || output.includes('terminal')) : true
+  const outputToConsole = output ? (output === 'console' || output.includes('console')) : false
+  return `const outputToTerminal = ${outputToTerminal}
+const outputToConsole = ${outputToConsole}
+export const terminal = ${createTerminal.toString()}()
 export default terminal
 `
 }
 
 function createTerminal() {
   const console = globalThis.console
-
   let count = 0
   let groupLevel = 0
 
@@ -194,7 +229,7 @@ function createTerminal() {
     fetch(`/__terminal/${type}?t=${Date.now()}&c=${count++}&g=${groupLevel}${encodedMessage}`)
   }
 
-  return {
+  const terminal = {
     log(...objs: any[]) { send('log', stringifyObjs(objs)) },
     info(...objs: any[]) { send('info', stringifyObjs(objs)) },
     warn(...objs: any[]) { send('warn', stringifyObjs(objs)) },
@@ -223,13 +258,13 @@ function createTerminal() {
       send('log', getTimer(id))
       timers.delete(id)
     },
-    count(label: string) {
+    count(label?: string) {
       const l = label || 'default'
       const n = (counters.get(l) || 0) + 1
       counters.set(l, n)
       send('log', `${l}: ${n}`)
     },
-    countReset(label: string) {
+    countReset(label?: string) {
       const l = label || 'default'
       counters.set(l, 0)
       send('log', `${l}: 0`)
@@ -246,8 +281,34 @@ function createTerminal() {
     trace(...args: any[]) { console.trace(...args) },
     profile(...args: any[]) { console.profile(...args) },
     profileEnd(...args: any[]) { console.profileEnd(...args) },
-
   }
+
+  function defineOutput(terminal: Terminal) {
+    // @ts-ignore
+    if (!outputToConsole)
+      return terminal
+    // @ts-ignore
+    if (!outputToTerminal)
+      return console
+    // Log to both the terminal and the console
+    const unsupportedMethods = ['trace', 'profile', 'profileEnd']
+    const multicast = {}
+    Object.keys(terminal).forEach((method) => {
+      // @ts-ignore
+      multicast[method] = unsupportedMethods.includes(method)
+        // @ts-ignore
+        ? console[method]
+        : (...args: any[]) => {
+          // @ts-ignore
+          console[method](...args)
+          // @ts-ignore
+          terminal[method](...args)
+        }
+    })
+    return multicast as Terminal
+  }
+
+  return defineOutput(terminal)
 }
 
 export default pluginTerminal

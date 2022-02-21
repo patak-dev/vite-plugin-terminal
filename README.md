@@ -101,6 +101,23 @@ You can also overwrite it in your `index.html` head manually in case you would l
 
 Check the [Console playground](./playground/console) for a full example.
 
+## Log in both the terminal and the console
+
+You can use the `output` option to define where the `terminal` logs should be logged. Accepts `terminal`, `console`, or an array with both.
+
+```ts
+// vite.config.ts
+import Terminal from 'vite-plugin-terminal'
+
+export default {
+  plugins: [
+    Terminal({
+      output: ['terminal', 'console']
+    })
+  ]
+}
+```
+
 ## Examples
 
 - **[Basic](https://stackblitz.com/fork/github-bdbxen-madd1h?file=module.js&terminal=dev)** - Playground using every available method.
@@ -109,6 +126,20 @@ Check the [Console playground](./playground/console) for a full example.
 - **[Vue](https://stackblitz.com/fork/github-gzl5vm?file=src%2FApp.vue&terminal=dev)** - Example of logging to the terminal from a Vue App.
 
 ## Options
+
+### `console`
+
+Type: `'terminal' | undefined`<br>
+Default: `undefined`<br>
+
+Set to `'terminal'` to make `globalThis.console` equal to the `terminal` object in your app.
+
+### `output`
+
+Type: `'terminal' | 'console' | ['terminal', 'console']`<br>
+Default: `terminal`<br>
+
+Define where the output for the logs.
 
 ### `strip`
 
