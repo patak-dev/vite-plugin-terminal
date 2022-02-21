@@ -16,6 +16,8 @@ export type FilterPattern = ReadonlyArray<string | RegExp> | string | RegExp | n
 type OutputType = 'terminal' | 'console'
 export type LogsOutput = OutputType | OutputType[]
 
+declare const terminalUrl: string
+
 export interface Options {
   /**
    * Redirect console logs to terminal
@@ -111,7 +113,7 @@ function pluginTerminal(options: Options = {}) {
     },
     load(id: string) {
       if (id === virtualResolvedId) {
-        virtualModuleCode ||= generateVirtualModuleCode(options.output)
+        virtualModuleCode ||= generateVirtualModuleCode(config.server?.origin ?? '', options.output)
         return virtualModuleCode
       }
       if (id === virtualResolvedId_console)
@@ -187,10 +189,11 @@ function pluginTerminal(options: Options = {}) {
   return [terminal, options.strip !== false && strip]
 }
 
-function generateVirtualModuleCode(output?: LogsOutput | LogsOutput[]) {
+function generateVirtualModuleCode(url: string, output?: LogsOutput | LogsOutput[]) {
   const outputToTerminal = output ? (output === 'terminal' || output.includes('terminal')) : true
   const outputToConsole = output ? (output === 'console' || output.includes('console')) : false
   return `const outputToTerminal = ${outputToTerminal}
+const terminalUrl = "${url}"
 const outputToConsole = ${outputToConsole}
 export const terminal = ${createTerminal.toString()}()
 export default terminal
@@ -226,7 +229,7 @@ function createTerminal() {
 
   function send(type: string, message?: string) {
     const encodedMessage = message ? `&m=${encodeURI(message)}` : ''
-    fetch(`/__terminal/${type}?t=${Date.now()}&c=${count++}&g=${groupLevel}${encodedMessage}`)
+    fetch(`${terminalUrl}/__terminal/${type}?t=${Date.now()}&c=${count++}&g=${groupLevel}${encodedMessage}`, { mode: 'no-cors' })
   }
 
   const terminal = {
