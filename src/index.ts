@@ -162,6 +162,8 @@ export default terminal
 }
 
 function createTerminal() {
+  const console = globalThis.console
+
   let count = 0
   let groupLevel = 0
 
@@ -205,6 +207,9 @@ function createTerminal() {
     group() {
       groupLevel++
     },
+    groupCollapsed() {
+      groupLevel++
+    },
     groupEnd() {
       groupLevel && --groupLevel
     },
@@ -238,6 +243,10 @@ function createTerminal() {
     dirxml(obj: any) {
       send('log', prettyPrint(obj))
     },
+    trace(...args: any[]) { console.trace(...args) },
+    profile(...args: any[]) { console.profile(...args) },
+    profileEnd(...args: any[]) { console.profileEnd(...args) },
+
   }
 }
 

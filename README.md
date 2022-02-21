@@ -48,6 +48,7 @@ Supported methods:
 - `terminal.error(obj1 [, obj2, ..., objN])`
 - `terminal.assert(assertion, obj1 [, obj2, ..., objN])`
 - `terminal.group()`
+- `terminal.groupCollapsed()`
 - `terminal.groupEnd()`
 - `terminal.table(obj)`
 - `terminal.time(id)`
@@ -58,6 +59,12 @@ Supported methods:
 - `terminal.countReset(label)`
 - `terminal.dir(obj)` 
 - `terminal.dirxml(obj)` 
+
+These methods will work but use the console
+
+- `terminal.trace(...args: any[])`
+- `terminal.profile(...args: any[])`
+- `terminal.profileEnd(...args: any[])`
 
 ## Redirect `console` logs to the terminal
 
