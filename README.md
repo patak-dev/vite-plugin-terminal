@@ -39,6 +39,30 @@ terminal.log('Hey terminal! A message from the browser')
 
 The terminal log calls will be removed when building the app.
 
+## Types
+
+There are two ways of telling typescript about the types of the virtual import:
+
+- In your `global.d.ts` file add the following line:
+  ```ts
+  /// <reference types="vite-plugin-terminal/client" />
+  ```
+
+- In your `tsconfig.json` add the following to your `compilerOptions.types` array:
+
+  ```json
+  {
+    // ...
+    "compilerOptions": {
+      // ...
+      "types": [
+        "vite-plugin-terminal/client"
+      ],
+    },
+  }
+  ```
+
+
 ## API
 
 Supported methods:
