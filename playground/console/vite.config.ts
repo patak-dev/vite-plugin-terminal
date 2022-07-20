@@ -1,6 +1,6 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
-import terminal from '../../src'
+import terminal from 'vite-plugin-terminal'
 
 export default defineConfig({
   plugins: [
