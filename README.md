@@ -145,7 +145,7 @@ export default {
 ## Examples
 
 - **[Basic](https://stackblitz.com/fork/github-bdbxen-madd1h?file=module.js&terminal=dev)** - Playground using every available method.
-- **[Console](https://stackblitz.com/fork/github-bdbxen-madd1h?file=module.js&terminal=dev)** - Redirect standard console logs to the terminal.
+- **[Console](https://stackblitz.com/fork/github/patak-dev/vite-plugin-terminal/tree/main/playground/console)** - Redirect standard console logs to the terminal.
 - **[Auto Import](https://stackblitz.com/fork/github-ejosid?file=main.ts&terminal=dev)** - Use [unplugin-auto-import](https://github.com/antfu/unplugin-auto-import) to make `terminal` global in your app.
 - **[Vue](https://stackblitz.com/fork/github-gzl5vm?file=src%2FApp.vue&terminal=dev)** - Example of logging to the terminal from a Vue App.
 
