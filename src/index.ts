@@ -1,5 +1,5 @@
 import readline from 'readline'
-import { lightGray, lightMagenta, lightRed, lightYellow } from 'kolorist'
+import { lightBlue, lightGray, lightMagenta, lightRed, lightYellow } from 'kolorist'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { parseURL } from 'ufo'
 import rollupPluginStrip from '@rollup/plugin-strip'
@@ -55,6 +55,7 @@ interface Terminal {
   error: (...obj: any[]) => void
   info: (...obj: any[]) => void
   log: (...obj: any[]) => void
+  debug: (...obj: any[]) => void
   table: (obj: any) => void
   warn: (...obj: any[]) => void
   group: () => void
@@ -73,12 +74,13 @@ interface Terminal {
   profileEnd: (...args: any[]) => void
 }
 
-const methods = ['assert', 'error', 'info', 'log', 'table', 'warn', 'clear'] as const
+const methods = ['assert', 'debug', 'error', 'info', 'log', 'table', 'warn', 'clear'] as const
 type Method = typeof methods[number]
 
 const colors = {
   log: lightMagenta,
   info: lightGray,
+  debug: lightBlue,
   warn: lightYellow,
   error: lightRed,
   assert: lightRed,
@@ -235,6 +237,7 @@ function createTerminal() {
   const terminal = {
     log(...objs: any[]) { send('log', stringifyObjs(objs)) },
     info(...objs: any[]) { send('info', stringifyObjs(objs)) },
+    debug(...objs: any[]) { send('debug', stringifyObjs(objs)) },
     warn(...objs: any[]) { send('warn', stringifyObjs(objs)) },
     error(...objs: any[]) { send('error', stringifyObjs(objs)) },
     assert(assertion: boolean, ...objs: any[]) {
