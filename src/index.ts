@@ -1,5 +1,5 @@
 import readline from 'readline'
-import { lightGray, lightMagenta, lightRed, lightYellow } from 'kolorist'
+import { lightBlue, lightGray, lightMagenta, lightRed, lightYellow } from 'kolorist'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { parseURL } from 'ufo'
 import rollupPluginStrip from '@rollup/plugin-strip'
