@@ -215,7 +215,7 @@ function createTerminal() {
   }
 
   function stringify(obj: any) {
-    return typeof obj === 'object' ? `${JSON.stringify(obj)}` : obj.toString()
+    return JSON.stringify(obj)
   }
 
   function prettyPrint(obj: any) {
