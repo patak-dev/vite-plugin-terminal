@@ -137,7 +137,7 @@ function pluginTerminal(options: Options = {}) {
         const { pathname, search } = parseURL(req.url)
         const searchParams = new URLSearchParams(search.slice(1))
 
-        const message = decodeURI(searchParams.get('m') ?? '').split('\n').join('\n  ')
+        const message = decodeURI(encodeURI(searchParams.get('m') ?? '').split('\n').join('\n  '))
         const time = parseInt(searchParams.get('t') ?? '0')
         const count = parseInt(searchParams.get('c') ?? '0')
         const groupLevel = parseInt(searchParams.get('g') ?? '0')
