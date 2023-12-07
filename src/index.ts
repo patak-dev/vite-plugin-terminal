@@ -122,8 +122,8 @@ function pluginTerminal(options: Options = {}) {
         return 'import terminal from "virtual:terminal"; globalThis.console = terminal'
     },
     transformIndexHtml: {
-      enforce: 'pre',
-      transform() {
+      order: 'pre',
+      handler() {
         if (options.console === 'terminal') {
           return [{
             tag: 'script',
