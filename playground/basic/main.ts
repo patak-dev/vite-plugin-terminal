@@ -33,3 +33,5 @@ setTimeout(() => {
   terminal.timeLog('timer', 'message with a timer')
   terminal.timeEnd('timer')
 }, 1000)
+
+terminal.log('Properly encoded message %')
