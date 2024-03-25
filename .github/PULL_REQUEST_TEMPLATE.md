@@ -11,5 +11,5 @@ Before creating the pull request, please make sure you do the following:
 - Update the corresponding documentation if needed.
 - Include relevant tests that fail without this PR but pass with it.
 
-Thank you for contributing to Vite!
+Thank you for contributing!
 ----------------------------------------------------------------------->
