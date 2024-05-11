@@ -48,6 +48,11 @@ export interface Options {
    * Filter for modules to not be processed to remove logs
    */
   exclude?: FilterPattern
+
+	/**
+	 * Custom logger to use in addition to the terminal
+	 */
+	customLogger?: Partial<Console>
 }
 
 interface Terminal {
