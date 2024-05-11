@@ -48,6 +48,11 @@ export interface Options {
    * Filter for modules to not be processed to remove logs
    */
   exclude?: FilterPattern
+
+	/**
+	 * Custom logger to use in addition to the terminal
+	 */
+	customLogger?: Partial<Console>
 }
 
 interface Terminal {
@@ -156,19 +161,26 @@ function pluginTerminal(options: Options = {}) {
                     readline.cursorTo(process.stdout, 0, 0)
                     readline.clearScreenDown(process.stdout)
                   }
+									options?.customLogger?.clear?.();
                 }
                 break
               }
               case 'table': {
                 const obj = JSON.parse(message)
                 const indent = 2 * (groupLevel + 1)
-                run = () => config.logger.info(`» ${table(obj, indent, 2)}`)
+                run = () => {
+									options?.customLogger?.info?.(`\xBB ${table(obj, indent, 2)}`);
+									config.logger.info(`\xBB ${table(obj, indent, 2)}`);
+								}
                 break
               }
               default: {
                 const color = colors[method]
                 const groupedMessage = groupText(message, groupLevel)
-                run = () => config.logger.info(color(`» ${groupedMessage}`))
+                run = () => {
+									options?.customLogger?.info?.(color(`\xBB ${groupedMessage}`));
+									config.logger.info(color(`\xBB ${groupedMessage}`));
+								};
                 break
               }
             }
